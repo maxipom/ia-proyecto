@@ -3,6 +3,7 @@ from random import seed
 from random import randrange
 from random import random
 from csv import reader
+import csv
 from math import exp
 
 # Load a CSV file
@@ -69,6 +70,10 @@ def accuracy_metric(actual, predicted):
 def evaluate_algorithm(dataset, algorithm, n_folds, *args):
 	folds = cross_validation_split(dataset, n_folds)
 	scores = list()
+
+	myFile = open('Salidas.csv', 'w')
+
+
 	for fold in folds:
 		train_set = list(folds)
 		train_set.remove(fold)
@@ -82,6 +87,11 @@ def evaluate_algorithm(dataset, algorithm, n_folds, *args):
 		actual = [row[-1] for row in fold]
 		accuracy = accuracy_metric(actual, predicted)
 		scores.append(accuracy)
+
+		with myFile:
+			writer = csv.writer(myFile)
+			writer.writerow(predicted)
+
 	return scores
 
 # Calculate neuron activation for an input
@@ -180,7 +190,7 @@ def back_propagation(train, test, l_rate, n_epoch, n_hidden):
 # Test Backprop on Seeds dataset
 seed(1)
 # load and prepare data
-filename = 'seeds_dataset.csv'
+filename = 'X_Y_train.csv'
 dataset = load_csv(filename)
 for i in range(len(dataset[0])-1):
 	str_column_to_float(dataset, i)
