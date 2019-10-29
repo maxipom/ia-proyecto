@@ -89,19 +89,16 @@ def evaluate_algorithm(train_dataset, test_dataset, algorithm, n_folds, *args):
         test_set.remove(test_folds[i])
         test_set = sum(test_set, [])
 
-        # for row in fold:
-        #     row_copy = list(row)
-        #     test_set.append(row_copy)
-        #     row_copy[-1] = None
         predicted = algorithm(train_set, test_set, *args)
         actual = [row[-1] for row in train_folds[i]]
         accuracy = accuracy_metric(actual, predicted)
         scores.append(accuracy)
 
-        f = open('test/Y_test.csv', 'w')
-        output_writer = csv.writer(f)
-        output_writer.writerow(predicted)
-        f.close()
+        file = open('test/Y_test.csv', 'w', newline='')
+        output_writer = csv.writer(file)
+        for row in predicted:
+            output_writer.writerow([row])
+        file.close()
 
     return scores
 
@@ -172,12 +169,15 @@ def update_weights(network, row, l_rate):
 # Train a network for a fixed number of epochs
 def train_network(network, train, l_rate, n_epoch, n_outputs):
     for epoch in range(n_epoch):
+        sum_error = 0
         for row in train:
             outputs = forward_propagate(network, row)
             expected = [0 for i in range(n_outputs)]
             expected[row[-1]] = 1
+            sum_error += sum([(expected[i] - outputs[i]) ** 2 for i in range(len(expected))])
             backward_propagate_error(network, expected)
             update_weights(network, row, l_rate)
+        print('>epoch=%d, lrate=%.3f, error=%.3f' % (epoch, l_rate, sum_error))
 
 
 # Initialize a network
@@ -261,9 +261,9 @@ normalize_dataset(test_data_set, minmax)
 
 # evaluate algorithm
 n_folds = 5
-l_rate = 0.3
-n_epoch = 500
-n_hidden = 5
+l_rate = 0.35
+n_epoch = 200
+n_hidden = 3
 scores = evaluate_algorithm(train_data_set, test_data_set, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
 print('Mean Accuracy: %.3f%%' % (sum(scores) / float(len(scores))))
