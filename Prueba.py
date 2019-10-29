@@ -75,21 +75,26 @@ def accuracy_metric(actual, predicted):
 
 
 # Evaluate an algorithm using a cross validation split
-def evaluate_algorithm(dataset, algorithm, n_folds, *args):
-    folds = cross_validation_split(dataset, n_folds)
+def evaluate_algorithm(train_dataset, test_dataset, algorithm, n_folds, *args):
+    train_folds = cross_validation_split(train_dataset, n_folds)
+    test_folds = cross_validation_split(test_dataset, n_folds)
     scores = list()
 
-    for fold in folds:
-        train_set = list(folds)
-        train_set.remove(fold)
+    for i in range(len(train_folds)):
+        train_set = list(train_folds)
+        train_set.remove(train_folds[i])
         train_set = sum(train_set, [])
-        test_set = list()
-        for row in fold:
-            row_copy = list(row)
-            test_set.append(row_copy)
-            row_copy[-1] = None
+
+        test_set = list(test_folds)
+        test_set.remove(test_folds[i])
+        test_set = sum(test_set, [])
+
+        # for row in fold:
+        #     row_copy = list(row)
+        #     test_set.append(row_copy)
+        #     row_copy[-1] = None
         predicted = algorithm(train_set, test_set, *args)
-        actual = [row[-1] for row in fold]
+        actual = [row[-1] for row in train_folds[i]]
         accuracy = accuracy_metric(actual, predicted)
         scores.append(accuracy)
 
@@ -236,20 +241,29 @@ for i in range(file_lenght):
 f.close()
 
 # load and prepare data
-filename = 'X_Y_train.csv'
-dataset = load_csv(filename)
-for i in range(len(dataset[0]) - 1):
-    str_column_to_float(dataset, i)
+train_set_file = 'X_Y_train.csv'
+train_data_set = load_csv(train_set_file)
+for i in range(len(train_data_set[0]) - 1):
+    str_column_to_float(train_data_set, i)
 # convert class column to integers
-str_column_to_int(dataset, len(dataset[0]) - 1)
+str_column_to_int(train_data_set, len(train_data_set[0]) - 1)
 # normalize input variables
-minmax = dataset_minmax(dataset)
-normalize_dataset(dataset, minmax)
+minmax = dataset_minmax(train_data_set)
+normalize_dataset(train_data_set, minmax)
+
+test_set_file = 'test/X_test.csv'
+test_data_set = load_csv(test_set_file)
+for i in range(len(test_data_set[0])):
+    str_column_to_float(test_data_set, i)
+# normalize input variables
+minmax = dataset_minmax(test_data_set)
+normalize_dataset(test_data_set, minmax)
+
 # evaluate algorithm
 n_folds = 5
 l_rate = 0.3
 n_epoch = 500
 n_hidden = 5
-scores = evaluate_algorithm(dataset, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
+scores = evaluate_algorithm(train_data_set, test_data_set, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
 print('Mean Accuracy: %.3f%%' % (sum(scores) / float(len(scores))))
