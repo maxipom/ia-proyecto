@@ -67,7 +67,7 @@ class RedNeuronal:
         if len(objetivos) != self.n_salidas:
             raise ValueError('wrong number of target values')
 
-            # calculate error terms for output
+        # calculate error terms for output
         salidas_delta = [0.0] * self.n_salidas
         for k in range(self.n_salidas):
             error = objetivos[k] - self.activacion_de_salidas[k]
@@ -90,8 +90,8 @@ class RedNeuronal:
         for i in range(self.n_entradas):
             for j in range(self.n_ocultos):
                 change = hidden_deltas[j] * self.activacion_de_entrada[i]
-                self.pesos_entrada[i][j] = self.pesos_entrada[i][j] + learning_rate * change + factor_momento * self.ultimo_cambio_salida[i][j]
-                self.ultimo_cambio_salida[i][j] = change
+                self.pesos_entrada[i][j] = self.pesos_entrada[i][j] + learning_rate * change + factor_momento * self.ultimo_cambio_entrada[i][j]
+                self.ultimo_cambio_entrada[i][j] = change
 
         error = 0.0
         # 0.5 es el Learning rate
@@ -108,7 +108,7 @@ class RedNeuronal:
 
             self.y_test.append(prediccion)
 
-    def entrenamiento(self, entrenamiento, iteraciones=1000, lerning_rate=0.1, factor_momento=0.01):
+    def entrenamiento(self, entrenamiento, iteraciones=1000, lerning_rate=0.15, factor_momento=0.05):
         for i in range(iteraciones):
             error = 0.0
             for row in entrenamiento:
@@ -116,22 +116,21 @@ class RedNeuronal:
                 objetivos = row[1]
                 self.actualizar(entradas)
                 error += self.backpropagation(objetivos, lerning_rate, factor_momento)
-            print('>iteracion de entrenamiento=%d, learning_rate=%.3f,factor_momento=%.3f error=%.3f'
-                  % (i, lerning_rate, factor_momento, error))
+            print('>iteracion de entrenamiento=%d, learning_rate=%.3f,factor_momento=%.3f '% (i, lerning_rate, factor_momento))
 
 def ejecutar():
     red_neuronal = RedNeuronal(5, 8, 1)
     random.seed(0)
 
     x_train = obtener_datos_de_archivo(X_TRAIN_FILE_NAME)
-    x_test = obtener_datos_de_archivo(X_TRAIN_FILE_NAME)
-    y_train = obtener_datos_de_archivo(X_TRAIN_FILE_NAME)
+    x_test = obtener_datos_de_archivo(X_TEST_FILE_NAME)
+    y_train = obtener_datos_de_archivo(Y_TRAIN_FILE_NAME)
 
     entrenamiento = []
     for i in range(x_train.shape[0]):
         entrenamiento.append([x_train[i], [y_train[i]]])
 
-    red_neuronal.entrenamiento(entrenamiento, 100)
+    red_neuronal.entrenamiento(entrenamiento, 1000)
     # test it
     test = []
 
