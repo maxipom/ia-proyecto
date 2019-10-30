@@ -94,9 +94,9 @@ class RedNeuronal:
                 self.ultimo_cambio_entrada[i][j] = change
 
         error = 0.0
-        # 0.5 es el Learning rate
+
         for k in range(len(objetivos)):
-            error += 0.5 * (objetivos[k] - self.activacion_de_ocultos[k]) ** 2
+            error += learning_rate * (objetivos[k] - self.activacion_de_ocultos[k]) ** 2
         return error
 
     def test(self, entrenamiento):
@@ -108,15 +108,17 @@ class RedNeuronal:
 
             self.y_test.append(prediccion)
 
-    def entrenamiento(self, entrenamiento, iteraciones=1000, lerning_rate=0.15, factor_momento=0.05):
+    def entrenamiento(self, entrenamiento, iteraciones=1000, learning_rate=0.15, factor_momento=0.05):
         for i in range(iteraciones):
             error = 0.0
             for row in entrenamiento:
                 entradas = row[0]
                 objetivos = row[1]
                 self.actualizar(entradas)
-                error += self.backpropagation(objetivos, lerning_rate, factor_momento)
-            print('>iteracion de entrenamiento=%d, learning_rate=%.3f,factor_momento=%.3f '% (i, lerning_rate, factor_momento))
+                error += self.backpropagation(objetivos, learning_rate, factor_momento)
+                if i % 10 == 0:
+                    emc = error / len(entrenamiento)
+                    print('>learning_rate=%.3f,factor_momento=%.3f,ECM=%.3f' % (learning_rate, factor_momento, emc))
 
 def ejecutar():
     red_neuronal = RedNeuronal(5, 8, 1)
