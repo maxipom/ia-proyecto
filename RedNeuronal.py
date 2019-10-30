@@ -10,10 +10,10 @@ Y_TRAIN_FILE_NAME = 'train/Y_train.csv'
 
 
 class RedNeuronal:
-    def __init__(self, inputs, nh, no):
-        self.n_entradas = inputs + BIAS_NODE
-        self.n_ocultos = nh
-        self.n_salidas = no
+    def __init__(self, n_entradas, n_ocultos, n_salidas):
+        self.n_entradas = n_entradas + BIAS_NODE
+        self.n_ocultos = n_ocultos
+        self.n_salidas = n_salidas
         self.y_test = []
         self.generar_pesos_entrada()
 
@@ -64,35 +64,39 @@ class RedNeuronal:
             self.activacion_de_entrada[i] = inputs[i]
 
     def backpropagation(self, objetivos, learning_rate, factor_momento):
+        if len(objetivos) != self.n_salidas:
+            raise ValueError('wrong number of target values')
+
+            # calculate error terms for output
         salidas_delta = [0.0] * self.n_salidas
         for k in range(self.n_salidas):
             error = objetivos[k] - self.activacion_de_salidas[k]
             salidas_delta[k] = dsigmoid(self.activacion_de_salidas[k]) * error
 
-        ocultos_deltas = [0.0] * self.n_ocultos
+        # calculate error terms for hidden
+        hidden_deltas = [0.0] * self.n_ocultos
         for j in range(self.n_ocultos):
             error = 0.0
             for k in range(self.n_salidas):
                 error += salidas_delta[k] * self.pesos_salida[j][k]
-            ocultos_deltas[j] = dsigmoid(self.activacion_de_ocultos[j]) * error
+            hidden_deltas[j] = dsigmoid(self.activacion_de_ocultos[j]) * error
 
         for j in range(self.n_ocultos):
             for k in range(self.n_salidas):
                 change = salidas_delta[k] * self.activacion_de_ocultos[j]
-                self.pesos_salida[j][k] = self.pesos_salida[j][k] + learning_rate * change + factor_momento * \
-                                          self.ultimo_cambio_salida[j][k]
+                self.pesos_salida[j][k] = self.pesos_salida[j][k] + learning_rate * change + factor_momento * self.ultimo_cambio_salida[j][k]
                 self.ultimo_cambio_salida[j][k] = change
 
         for i in range(self.n_entradas):
             for j in range(self.n_ocultos):
-                change = ocultos_deltas[j] * self.activacion_de_entrada[i]
-                self.pesos_entrada[i][j] = self.pesos_entrada[i][j] + learning_rate * change + factor_momento * \
-                                           self.ultimo_cambio_entrada[i][j]
-                self.ultimo_cambio_entrada[i][j] = change
+                change = hidden_deltas[j] * self.activacion_de_entrada[i]
+                self.pesos_entrada[i][j] = self.pesos_entrada[i][j] + learning_rate * change + factor_momento * self.ultimo_cambio_salida[i][j]
+                self.ultimo_cambio_salida[i][j] = change
 
         error = 0.0
+        # 0.5 es el Learning rate
         for k in range(len(objetivos)):
-            error += learning_rate * (objetivos[k] - self.activacion_de_salidas[k]) ** 2
+            error += 0.5 * (objetivos[k] - self.activacion_de_ocultos[k]) ** 2
         return error
 
     def test(self, entrenamiento):
@@ -114,7 +118,6 @@ class RedNeuronal:
                 error += self.backpropagation(objetivos, lerning_rate, factor_momento)
             print('>iteracion de entrenamiento=%d, learning_rate=%.3f,factor_momento=%.3f error=%.3f'
                   % (i, lerning_rate, factor_momento, error))
-
 
 def ejecutar():
     red_neuronal = RedNeuronal(5, 8, 1)
