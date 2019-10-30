@@ -6,7 +6,10 @@ from csv import reader
 import csv
 from math import exp
 
+# import pandas as pn
+# import matplotlib.pyplot as plt
 
+# from sklearn.neural_network import MLPClassifier as perceptron
 # Load a CSV file
 def load_csv(filename):
     dataset = list()
@@ -168,11 +171,12 @@ def update_weights(network, row, l_rate):
 
 # Train a network for a fixed number of epochs
 def train_network(network, train, l_rate, n_epoch, n_outputs):
+    initial_expected = [0 for i in range(n_outputs)]
     for epoch in range(n_epoch):
         sum_error = 0
         for row in train:
             outputs = forward_propagate(network, row)
-            expected = [0 for i in range(n_outputs)]
+            expected = initial_expected
             expected[row[-1]] = 1
             sum_error += sum([(expected[i] - outputs[i]) ** 2 for i in range(len(expected))])
             backward_propagate_error(network, expected)
@@ -248,22 +252,22 @@ for i in range(len(train_data_set[0]) - 1):
 # convert class column to integers
 str_column_to_int(train_data_set, len(train_data_set[0]) - 1)
 # normalize input variables
-minmax = dataset_minmax(train_data_set)
-normalize_dataset(train_data_set, minmax)
+# minmax = dataset_minmax(train_data_set)
+# normalize_dataset(train_data_set, minmax)
 
 test_set_file = 'test/X_test.csv'
 test_data_set = load_csv(test_set_file)
 for i in range(len(test_data_set[0])):
     str_column_to_float(test_data_set, i)
 # normalize input variables
-minmax = dataset_minmax(test_data_set)
-normalize_dataset(test_data_set, minmax)
+# minmax = dataset_minmax(test_data_set)
+# normalize_dataset(test_data_set, minmax)
 
 # evaluate algorithm
-n_folds = 5
-l_rate = 0.35
-n_epoch = 200
-n_hidden = 3
+n_folds = 2
+l_rate = 0.5
+n_epoch = 1000
+n_hidden = 2
 scores = evaluate_algorithm(train_data_set, test_data_set, back_propagation, n_folds, l_rate, n_epoch, n_hidden)
 print('Scores: %s' % scores)
 print('Mean Accuracy: %.3f%%' % (sum(scores) / float(len(scores))))
