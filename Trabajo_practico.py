@@ -1,6 +1,15 @@
+# Universidad Tecnologica Nacional - Facultad Regional de Córdoba
+# Trabajo práctico, Inteligencia Artificaial
+#
+# Curso: k4
+# Año: 2019
+# Integrantes
+# Corrales, Camila Alejandra - 70003
+# Ledesma, Lorena Soledad - 68766
+# Pomar, Maximiliano - 70255
+
 import math
 import random
-
 import numpy as np
 
 BIAS_NODE = 1
@@ -65,15 +74,13 @@ class RedNeuronal:
 
     def backpropagation(self, objetivos, learning_rate, factor_momento):
         if len(objetivos) != self.n_salidas:
-            raise ValueError('wrong number of target values')
+            raise ValueError('Error en el evalor de los objetivos')
 
-        # calculate error terms for output
         salidas_delta = [0.0] * self.n_salidas
         for k in range(self.n_salidas):
             error = objetivos[k] - self.activacion_de_salidas[k]
             salidas_delta[k] = dsigmoid(self.activacion_de_salidas[k]) * error
 
-        # calculate error terms for hidden
         hidden_deltas = [0.0] * self.n_ocultos
         for j in range(self.n_ocultos):
             error = 0.0
@@ -118,7 +125,7 @@ class RedNeuronal:
                 error += self.backpropagation(objetivos, learning_rate, factor_momento)
                 if i % 10 == 0:
                     emc = error / len(entrenamiento)
-                    print('>learning_rate=%.3f,factor_momento=%.3f,ECM=%.3f' % (learning_rate, factor_momento, emc))
+                    print('> learning_rate=%.3f,factor_momento=%.3f,ECM=%.3f' % (learning_rate, factor_momento, emc))
 
 def ejecutar():
     red_neuronal = RedNeuronal(5, 8, 1)
@@ -133,11 +140,11 @@ def ejecutar():
         entrenamiento.append([x_train[i], [y_train[i]]])
 
     red_neuronal.entrenamiento(entrenamiento, 1000)
-    # test it
-    test = []
 
+    test = []
     for i in range(x_test.shape[0]):
         test.append([x_test[i]])
+
     red_neuronal.test(test)
     np.savetxt('Y_test.csv', [red_neuronal.y_test], delimiter='\n', fmt='%d')
 
